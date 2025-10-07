@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prim's Algorithm - Forest Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 500px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #333;
+    }
+
+    .input-group {
+      margin: 15px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    input {
+      width: 60px;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+      text-align: center;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #output {
+      width: 100%;
+      height: 250px;
+      margin-top: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      background: #f9f9f9;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌲 Prim's Algorithm - Forest Management</h1>
+    <p>Number of Forest Areas (Nodes): <b id="vertexCount">5</b></p>
+
+    <div class="input-group">
+      <label>From:</label>
+      <input type="number" id="fromNode" min="0" max="4" />
+      <label>To:</label>
+      <input type="number" id="toNode" min="0" max="4" />
+      <label>Cost:</label>
+      <input type="number" id="cost" min="1" />
+      <button onclick="addEdge()">Add Edge</button>
+    </div>
+
+    <button onclick="runPrim()">Run Prim's Algorithm</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const V = 5;
+    const graph = Array.from({ length: V }, () => []);
+
+    function addEdge() {
+      const u = parseInt(document.getElementById("fromNode").value);
+      const v = parseInt(document.getElementById("toNode").value);
+      const w = parseInt(document.getElementById("cost").value);
+      const output = document.getElementById("output");
+
+      if (isNaN(u) || isNaN(v) || isNaN(w)) {
+        alert("Please enter valid numbers for all fields.");
+        return;
+      }
+      if (u < 0 || u >= V || v < 0 || v >= V) {
+        alert(`Nodes must be between 0 and ${V - 1}`);
+        return;
+      }
+      if (w <= 0) {
+        alert("Cost must be positive.");
+        return;
+      }
+
+      graph[u].push([w, v]);
+      graph[v].push([w, u]);
+
+      output.textContent += `Added edge: ${u} -- ${v} (cost=${w})\n`;
+
+      document.getElementById("fromNode").value = "";
+      document.getElementById("toNode").value = "";
+      document.getElementById("cost").value = "";
+    }
+
+    function runPrim() {
+      const output = document.getElementById("output");
+      output.textContent += `\nRunning Prim's Algorithm...\n`;
+
+      const visited = Array(V).fill(false);
+      const minHeap = [[0, 0, -1]]; // [weight, node, parent]
+      let mstCost = 0;
+      const mstEdges = [];
+
+      while (minHeap.length && mstEdges.length < V - 1) {
+        minHeap.sort((a, b) => a[0] - b[0]); // simple priority queue
+        const [weight, u, parent] = minHeap.shift();
+
+        if (visited[u]) continue;
+        visited[u] = true;
+        mstCost += weight;
+        if (parent !== -1) mstEdges.push([parent, u, weight]);
+
+        for (const [w, v] of graph[u]) {
+          if (!visited[v]) {
+            minHeap.push([w, v, u]);
+          }
+        }
+      }
+
+      if (mstEdges.length !== V - 1) {
+        output.textContent += "⚠️ Not all nodes are connected!\n";
+      }
+
+      mstEdges.forEach(([u, v, w]) => {
+        output.textContent += `${u} -- ${v}  cost=${w}\n`;
+      });
+      output.textContent += `Total Optimal Cost: ${mstCost}\n\n`;
+    }
+  </script>
+</body>
+</html>
